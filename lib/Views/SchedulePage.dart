@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
+import 'package:intl/intl.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -9,10 +10,13 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> {
+  final eventController = EventController();
+  String currentMonthName = DateFormat('MMM yyyy').format(DateTime.now());
+
   @override
   Widget build(BuildContext context) {
     return CalendarControllerProvider(
-      controller: EventController(),
+      controller: eventController,
       child: Scaffold(
         backgroundColor: Color(0xffF3E8EE),
         body: Column(
@@ -82,6 +86,15 @@ class _SchedulePageState extends State<SchedulePage> {
                       ), // (Room Availability)
                     ],
                   ), // Room Info Frame
+                  Text(
+                    currentMonthName,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      fontFamily: 'Instrument Sans',
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   Icon(Icons
                       .signal_cellular_connected_no_internet_0_bar_sharp) // Backend: Shown when Wifi Connection is lost
                 ],
@@ -90,8 +103,12 @@ class _SchedulePageState extends State<SchedulePage> {
             Expanded(
                 child: WeekView(
               initialDay: DateTime.now(),
+              onPageChange: (date, page) {
+                setState(() {
+                  currentMonthName = DateFormat('MMM yyyy').format(date);
+                });
+              },
               backgroundColor: Color(0xffF3E8EE),
-              controller: EventController(),
               weekTitleHeight: 120,
               heightPerMinute: 1.5,
               startHour: 8,
@@ -201,6 +218,18 @@ class _SchedulePageState extends State<SchedulePage> {
             )),
           ],
         ),
+        floatingActionButton: FloatingActionButton(onPressed: () {
+          final event = CalendarEventData(
+            title: "Test Event 1",
+            date: DateTime.now(),
+            endDate: DateTime.now(),
+            startTime: DateTime(2025, 1, 13, 12, 30),
+            endTime: DateTime(2025, 1, 13, 2, 0),
+          );
+
+          CalendarControllerProvider.of(context).controller.add(event);
+          print("Created Event");
+        }),
       ),
     );
   }
