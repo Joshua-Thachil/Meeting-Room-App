@@ -96,6 +96,14 @@ class _SchedulePageState extends State<SchedulePage> {
               heightPerMinute: 1.5,
               startHour: 8,
               endHour: 20,
+              liveTimeIndicatorSettings: LiveTimeIndicatorSettings(
+                  height: 2,
+                  color: Color(0xff04243E),
+                  showTimeBackgroundView: false,
+                  showBullet: true,
+                  bulletRadius: 7,
+                  timeBackgroundViewWidth: 80,
+                  offset: -35),
               hourIndicatorSettings:
                   HourIndicatorSettings(color: Color(0xff9E979B)),
               weekPageHeaderBuilder: WeekHeader.hidden,
@@ -169,7 +177,9 @@ class _SchedulePageState extends State<SchedulePage> {
                     Text(
                       date.day.toString(),
                       style: TextStyle(
-                          color: Colors.black,
+                          color: date.day == DateTime.now().day
+                              ? Colors.black
+                              : Color(0xff9E979B),
                           fontSize: 40,
                           fontFamily: 'Instrument Sans',
                           fontWeight: FontWeight.w700),
@@ -177,15 +187,17 @@ class _SchedulePageState extends State<SchedulePage> {
                     Text(
                       day,
                       style: TextStyle(
-                        color: Colors.black,
+                        color: date.day == DateTime.now().day
+                            ? Colors.black
+                            : Color(0xff9E979B),
                         fontSize: 16,
                         fontFamily: 'Instrument Sans',
                         fontWeight: FontWeight.w500,
                       ),
-                    )
+                    ),
                   ],
                 );
-              }, // Week number and name heading styles
+              }, // Dates and Days heading styles
             )),
           ],
         ),
