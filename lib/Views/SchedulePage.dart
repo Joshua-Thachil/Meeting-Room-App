@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:intl/intl.dart';
+import 'package:meeting_room_app/Model/EventData.dart';
+import 'package:meeting_room_app/ViewModel/EventFunctions.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -94,7 +96,7 @@ class _SchedulePageState extends State<SchedulePage> {
                       fontFamily: 'Instrument Sans',
                       fontWeight: FontWeight.w700,
                     ),
-                  ),
+                  ), // Month Name text
                   Icon(Icons
                       .signal_cellular_connected_no_internet_0_bar_sharp) // Backend: Shown when Wifi Connection is lost
                 ],
@@ -219,16 +221,7 @@ class _SchedulePageState extends State<SchedulePage> {
           ],
         ),
         floatingActionButton: FloatingActionButton(onPressed: () {
-          final event = CalendarEventData(
-            title: "Test Event 1",
-            date: DateTime.now(),
-            endDate: DateTime.now(),
-            startTime: DateTime(2025, 1, 13, 12, 30),
-            endTime: DateTime(2025, 1, 13, 2, 0),
-          );
-
-          CalendarControllerProvider.of(context).controller.add(event);
-          print("Created Event");
+          EventFunctions().addEvents(EventModel().events, eventController);
         }),
       ),
     );
