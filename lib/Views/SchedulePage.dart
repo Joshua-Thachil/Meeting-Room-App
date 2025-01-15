@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:intl/intl.dart';
-import 'package:meeting_room_app/Model/EventData.dart';
+import 'package:meeting_room_app/Model/EventModel.dart';
 import 'package:meeting_room_app/ViewModel/EventFunctions.dart';
 
 class SchedulePage extends StatefulWidget {
@@ -14,6 +14,38 @@ class SchedulePage extends StatefulWidget {
 class _SchedulePageState extends State<SchedulePage> {
   final eventController = EventController();
   String currentMonthName = DateFormat('MMM yyyy').format(DateTime.now());
+  DateTime now = DateTime.now();
+  bool isOccupied = false;
+
+  String formatTimeWithoutLeadingZero(DateTime time) {
+    int hour = time.hour;
+
+    // Convert 24-hour to 12-hour format
+    if (hour == 0) {
+      hour = 12;
+    } else if (hour > 12) {
+      hour -= 12;
+    }
+
+    String hourStr = hour.toString();
+    String minute = time.minute
+        .toString()
+        .padLeft(2, '0'); // Ensure minutes have leading zero
+
+    // Remove leading zero from hour if applicable
+    if (hourStr.startsWith('0')) {
+      hourStr = hourStr.substring(1);
+    }
+
+    return '$hourStr:$minute';
+  }
+
+  String formatTimeRange(DateTime startTime, DateTime endTime) {
+    String start = formatTimeWithoutLeadingZero(startTime);
+    String end = formatTimeWithoutLeadingZero(endTime) +
+        " ${endTime.hour >= 12 ? "PM" : "AM"}";
+    return "$start - $end";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +147,10 @@ class _SchedulePageState extends State<SchedulePage> {
               heightPerMinute: 1.5,
               startHour: 8,
               endHour: 20,
+                  weekNumberBuilder: (firstDayOfWeek) {
+                    return null;
+                  },
+
               liveTimeIndicatorSettings: LiveTimeIndicatorSettings(
                   height: 2,
                   color: Color(0xff04243E),
@@ -196,7 +232,7 @@ class _SchedulePageState extends State<SchedulePage> {
                     Text(
                       date.day.toString(),
                       style: TextStyle(
-                          color: date.day == DateTime.now().day
+                          color: date.day == now.day && date.month == now.month
                               ? Colors.black
                               : Color(0xff9E979B),
                           fontSize: 40,
@@ -206,7 +242,7 @@ class _SchedulePageState extends State<SchedulePage> {
                     Text(
                       day,
                       style: TextStyle(
-                        color: date.day == DateTime.now().day
+                        color: date.day == now.day && date.month == now.month
                             ? Colors.black
                             : Color(0xff9E979B),
                         fontSize: 16,
@@ -217,10 +253,115 @@ class _SchedulePageState extends State<SchedulePage> {
                   ],
                 );
               }, // Dates and Days heading styles
+              eventTileBuilder:
+                  (date, events, boundary, startDuration, endDuration) {
+                if (now.isAfter(startDuration) &&
+                    now.isBefore(endDuration)) {
+                  return Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
+                    child: Container(
+                      decoration: ShapeDecoration(
+                        color: Color(0xFFF4D35E),
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            width: 2,
+                            strokeAlign: BorderSide.strokeAlignOutside,
+                            color: Color(0xFFDA5959),
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        shadows: [
+                          BoxShadow(
+                            color: Color(0x3F000000),
+                            blurRadius: 20,
+                            offset: Offset(0, 4),
+                            spreadRadius: 10,
+                          )
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 14, horizontal: 11),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              // DateFormat('hh:mm').format(events.last.startTime!) + " - " + DateFormat('hh:mm a').format(events.last.endTime!)
+                              formatTimeRange(
+                                  events.last.startTime!, events.last.endTime!),
+                              style: TextStyle(
+                                color: Colors.black
+                                    .withOpacity(0.30000001192092896),
+                                fontSize: 14,
+                                fontFamily: 'Instrument Sans',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ), // Event Time Text
+                            Text(
+                              events.last.title,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 12,
+                                fontFamily: 'Instrument Sans',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ), // Event Title Text
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                } else {
+                  return Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
+                    child: Container(
+                      decoration: ShapeDecoration(
+                        color: Color(0xFFF4D35E),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 14, horizontal: 11),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              // DateFormat('hh:mm').format(events.last.startTime!) + " - " + DateFormat('hh:mm a').format(events.last.endTime!)
+                              formatTimeRange(
+                                  events.last.startTime!, events.last.endTime!),
+                              style: TextStyle(
+                                color: Colors.black
+                                    .withOpacity(0.30000001192092896),
+                                fontSize: 14,
+                                fontFamily: 'Instrument Sans',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ), // Event Time Text
+                            Text(
+                              events.last.title,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 12,
+                                fontFamily: 'Instrument Sans',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ), // Event Title Text
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+              },
             )),
           ],
         ),
         floatingActionButton: FloatingActionButton(onPressed: () {
+          // Function call to add all events from the EventModel
           EventFunctions().addEvents(EventModel().events, eventController);
         }),
       ),
