@@ -47,6 +47,143 @@ class _SchedulePageState extends State<SchedulePage> {
     return "$start - $end";
   }
 
+  void showOverlay(
+      BuildContext context, String eventTitle, DateTime start, DateTime end) {
+    String timeRange = formatTimeRange(start, end);
+    OverlayEntry? overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => Center(
+        // Use Center widget
+        child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: 1051,
+              height: 594,
+              clipBehavior: Clip.antiAlias,
+              decoration: ShapeDecoration(
+                color: Color(0xFFF4D35E),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                shadows: [
+                  BoxShadow(
+                    color: Color(0x3F000000),
+                    blurRadius: 4,
+                    offset: Offset(0, 4),
+                    spreadRadius: 150,
+                  )
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    left: 66, top: 38, right: 36, bottom: 32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              eventTitle,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 48,
+                                fontFamily: 'Instrument Sans',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            GestureDetector(
+                                onTap: () {
+                                  overlayEntry?.remove();
+                                },
+                                child: Icon(
+                                  Icons.close,
+                                  size: 32,
+                                ))
+                          ],
+                        ), // Event Title + Close Icon
+                        SizedBox(height: 5),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 6),
+                              decoration: ShapeDecoration(
+                                color: Color(0xFF5E2BFF),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(9)),
+                              ),
+                              child: Text(
+                                'Ongoing', // Backend: "Ongoing" or "Upcoming" or "Completed" Based on event status
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontFamily: 'Instrument Sans',
+                                  fontWeight: FontWeight.w700,
+                                  height: 1,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 35),
+                            Text(
+                              timeRange,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.black
+                                    .withOpacity(0.30000001192092896),
+                                fontSize: 20,
+                                fontFamily: 'Instrument Sans',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                          ],
+                        ), // Event Status + Event Duration
+                        SizedBox(height: 40),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 15),
+                          child: Text(
+                            'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus.',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
+                              fontFamily: 'Instrument Sans',
+                              fontWeight: FontWeight.w500,
+                              height: 1.50,
+                            ),
+                          ),
+                        ), // Event Description Text
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Icon(Icons.person_2_outlined, size: 32),
+                        SizedBox(width: 18),
+                        Text(
+                          'Dr. Vijay Arputharaj',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                            fontFamily: 'Instrument Sans',
+                            fontWeight: FontWeight.w700,
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            )),
+      ),
+    );
+
+    Overlay.of(context).insert(overlayEntry);
+  }
+
   @override
   Widget build(BuildContext context) {
     return CalendarControllerProvider(
@@ -96,7 +233,7 @@ class _SchedulePageState extends State<SchedulePage> {
                         clipBehavior: Clip.antiAlias,
                         decoration: ShapeDecoration(
                           color: Color(
-                              0xFF9E0031), // Backend: Color Changes Based on Availability (Available Color: Color(0xff729B79))
+                              0xFF9E0031), // Backend: Color Changes Based on if an event is going on in the room or not (Room available Color: Color(0xff729B79))
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(9)),
                         ),
@@ -147,9 +284,9 @@ class _SchedulePageState extends State<SchedulePage> {
               heightPerMinute: 1.5,
               startHour: 8,
               endHour: 20,
-                  weekNumberBuilder: (firstDayOfWeek) {
-                    return null;
-                  },
+              weekNumberBuilder: (firstDayOfWeek) {
+                return null;
+              },
 
               liveTimeIndicatorSettings: LiveTimeIndicatorSettings(
                   height: 2,
@@ -163,6 +300,10 @@ class _SchedulePageState extends State<SchedulePage> {
                   HourIndicatorSettings(color: Color(0xff9E979B)),
               weekPageHeaderBuilder: WeekHeader.hidden,
               timeLineWidth: 150,
+              onEventTap: (events, date) {
+                showOverlay(context, events.last.title, events.last.startTime!,
+                    events.last.endTime!);
+              },
               timeLineBuilder: (date) {
                 final hour = date.hour;
                 if (hour >= 8 && hour <= 20) {
@@ -255,8 +396,7 @@ class _SchedulePageState extends State<SchedulePage> {
               }, // Dates and Days heading styles
               eventTileBuilder:
                   (date, events, boundary, startDuration, endDuration) {
-                if (now.isAfter(startDuration) &&
-                    now.isBefore(endDuration)) {
+                if (now.isAfter(startDuration) && now.isBefore(endDuration)) {
                   return Padding(
                     padding:
                         const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
@@ -330,7 +470,6 @@ class _SchedulePageState extends State<SchedulePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              // DateFormat('hh:mm').format(events.last.startTime!) + " - " + DateFormat('hh:mm a').format(events.last.endTime!)
                               formatTimeRange(
                                   events.last.startTime!, events.last.endTime!),
                               style: TextStyle(
