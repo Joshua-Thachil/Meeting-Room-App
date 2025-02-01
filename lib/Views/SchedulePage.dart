@@ -12,9 +12,10 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> {
-  final eventController = EventController();
   String currentMonthName = DateFormat('MMM yyyy').format(DateTime.now());
   DateTime now = DateTime.now();
+  DateTime currentWeek = DateTime.now();
+  UniqueKey weekViewKey = UniqueKey();
   bool isOccupied = false;
 
   String formatTimeWithoutLeadingZero(DateTime time) {
@@ -184,80 +185,118 @@ class _SchedulePageState extends State<SchedulePage> {
     Overlay.of(context).insert(overlayEntry);
   }
 
+  void goToNextWeek() {
+    setState(() {
+      currentWeek = currentWeek.add(Duration(days: 7));
+      currentMonthName = DateFormat('MMM yyyy').format(currentWeek);
+      weekViewKey = UniqueKey();
+    });
+  }
+
+  void goToPrevWeek() {
+    setState(() {
+      currentWeek = currentWeek.add(Duration(days: -7));
+      currentMonthName = DateFormat('MMM yyyy').format(currentWeek);
+      weekViewKey = UniqueKey();
+    });
+  }
+
+  // Function to show the month picker dialog
+  void _showMonthPicker(BuildContext context) async {
+    DateTime? selectedDate = await showDatePicker(
+      context: context,
+      firstDate: DateTime.now(),
+      initialDate: currentWeek,
+      lastDate: DateTime(2050),
+    );
+
+    if (selectedDate != null) {
+      setState(() {
+        currentWeek = DateTime(selectedDate.year, selectedDate.month,
+            1); // Set to the beginning of the selected month
+        currentMonthName =
+            DateFormat('MMM yyyy').format(currentWeek); // Update the month name
+        weekViewKey = UniqueKey();
+      });
+    }
+
+    currentWeek = selectedDate as DateTime;
+    weekViewKey = UniqueKey();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return CalendarControllerProvider(
-      controller: eventController,
-      child: Scaffold(
-        backgroundColor: Color(0xffF3E8EE),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 40, left: 50, right: 50),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Panel Room, 2nd block',
-                        style: TextStyle(
-                            color: Colors.black,
+    return Scaffold(
+      backgroundColor: Color(0xffF3E8EE),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 40, left: 50, right: 50),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Panel Room, 2nd block',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontFamily: 'Instrument Sans',
+                          fontWeight: FontWeight.bold),
+                    ), // "Panel Room, 2nd Block" (Room Location)
+                    SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Icon(Icons.groups_outlined, color: Color(0xff9E979B)),
+                        SizedBox(width: 18),
+                        Text(
+                          '50 - 100',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Color(0xFF9E979B),
                             fontSize: 16,
                             fontFamily: 'Instrument Sans',
-                            fontWeight: FontWeight.bold),
-                      ), // "Panel Room, 2nd Block" (Room Location)
-                      SizedBox(height: 2),
-                      Row(
+                            fontWeight: FontWeight.w700,
+                            height: 1,
+                          ),
+                        )
+                      ],
+                    ), // (Room Capacity)
+                    SizedBox(height: 2),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 6),
+                      clipBehavior: Clip.antiAlias,
+                      decoration: ShapeDecoration(
+                        color: Color(
+                            0xFF9E0031), // Backend: Color Changes Based on if an event is going on in the room or not (Room available Color: Color(0xff729B79))
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(9)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Icon(Icons.groups_outlined, color: Color(0xff9E979B)),
-                          SizedBox(width: 18),
                           Text(
-                            '50 - 100',
+                            'Occupied',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Color(0xFF9E979B),
-                              fontSize: 16,
+                              color: Colors.white,
+                              fontSize: 14,
                               fontFamily: 'Instrument Sans',
                               fontWeight: FontWeight.w700,
                               height: 1,
                             ),
-                          )
+                          ),
                         ],
-                      ), // (Room Capacity)
-                      SizedBox(height: 2),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 6),
-                        clipBehavior: Clip.antiAlias,
-                        decoration: ShapeDecoration(
-                          color: Color(
-                              0xFF9E0031), // Backend: Color Changes Based on if an event is going on in the room or not (Room available Color: Color(0xff729B79))
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(9)),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Occupied',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontFamily: 'Instrument Sans',
-                                fontWeight: FontWeight.w700,
-                                height: 1,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ), // (Room Availability)
-                    ],
-                  ), // Room Info Frame
-                  Text(
+                      ),
+                    ), // (Room Availability)
+                  ],
+                ), // Room Info Frame
+                GestureDetector(
+                  child: Text(
                     currentMonthName,
                     style: TextStyle(
                       color: Colors.black,
@@ -265,29 +304,48 @@ class _SchedulePageState extends State<SchedulePage> {
                       fontFamily: 'Instrument Sans',
                       fontWeight: FontWeight.w700,
                     ),
-                  ), // Month Name text
-                  Icon(Icons
-                      .signal_cellular_connected_no_internet_0_bar_sharp) // Backend: Shown when Wifi Connection is lost
-                ],
-              ),
+                  ),
+                  onTap: () {
+                    _showMonthPicker(context);
+                  },
+                ), // Month Name text
+                Icon(Icons
+                    .signal_cellular_connected_no_internet_0_bar_sharp) // Backend: Shown when Wifi Connection is lost
+              ],
             ),
-            Expanded(
-                child: WeekView(
-              initialDay: DateTime.now(),
+          ), // Room Info + month + Network issue icon
+          Expanded(
+              child: Stack(children: [
+            WeekView(
+              initialDay: currentWeek,
+              key: weekViewKey,
               onPageChange: (date, page) {
                 setState(() {
-                  currentMonthName = DateFormat('MMM yyyy').format(date);
+                  if (date.isAfter(currentWeek)) {
+                    currentWeek = currentWeek.add(Duration(days: 7));
+                    currentMonthName = DateFormat('MMM yyyy').format(currentWeek);
+                  } else {
+                    currentWeek = currentWeek.add(Duration(days: -7));
+                    currentMonthName = DateFormat('MMM yyyy').format(currentWeek);
+                  }
                 });
               },
               backgroundColor: Color(0xffF3E8EE),
               weekTitleHeight: 120,
-              heightPerMinute: 1.5,
-              startHour: 8,
-              endHour: 20,
+              heightPerMinute: 1.2,
+              startHour: 9,
+              endHour: 18,
+              weekDays: [
+                WeekDays.monday,
+                WeekDays.tuesday,
+                WeekDays.wednesday,
+                WeekDays.thursday,
+                WeekDays.friday,
+                WeekDays.saturday
+              ],
               weekNumberBuilder: (firstDayOfWeek) {
                 return null;
               },
-
               liveTimeIndicatorSettings: LiveTimeIndicatorSettings(
                   height: 2,
                   color: Color(0xff04243E),
@@ -361,10 +419,6 @@ class _SchedulePageState extends State<SchedulePage> {
 
                   case 6:
                     day = "sat";
-                    break;
-
-                  case 7:
-                    day = "sun";
                     break;
                 }
                 return Column(
@@ -496,13 +550,32 @@ class _SchedulePageState extends State<SchedulePage> {
                   );
                 }
               },
-            )),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(onPressed: () {
-          // Function call to add all events from the EventModel
-          EventFunctions().addEvents(EventModel().events, eventController);
-        }),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 152, right: 18, top: 45),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      child: Icon(Icons.keyboard_arrow_left, size: 32,),
+                      onTap: () {
+                        goToPrevWeek();
+                      },
+                    ), // Previous Week Button
+                    GestureDetector(
+                      child: Icon(Icons.navigate_next, size: 32,),
+                      onTap: () {
+                        goToNextWeek();
+                      },
+                    ), // Next Week Button
+                  ],
+                ),
+              ),
+            ) // Arrows for navigating the weekView
+          ])),
+        ],
       ),
     );
   }
