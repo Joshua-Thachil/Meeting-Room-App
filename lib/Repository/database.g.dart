@@ -96,7 +96,7 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `EventEntity` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `title` TEXT, `startTime` TEXT, `endTime` TEXT)');
+            'CREATE TABLE IF NOT EXISTS `Events` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `title` TEXT, `startTime` TEXT, `endTime` TEXT)');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -115,10 +115,10 @@ class _$EventDAO extends EventDAO {
     this.database,
     this.changeListener,
   )   : _queryAdapter = QueryAdapter(database),
-        _eventEntityInsertionAdapter = InsertionAdapter(
+        _eventsInsertionAdapter = InsertionAdapter(
             database,
-            'EventEntity',
-            (EventEntity item) => <String, Object?>{
+            'Events',
+            (Events item) => <String, Object?>{
                   'id': item.id,
                   'title': item.title,
                   'startTime': item.startTime,
@@ -131,12 +131,12 @@ class _$EventDAO extends EventDAO {
 
   final QueryAdapter _queryAdapter;
 
-  final InsertionAdapter<EventEntity> _eventEntityInsertionAdapter;
+  final InsertionAdapter<Events> _eventsInsertionAdapter;
 
   @override
-  Future<List<EventEntity>> getAllEvents() async {
-    return _queryAdapter.queryList('SELECT * from EventEntity',
-        mapper: (Map<String, Object?> row) => EventEntity(
+  Future<List<Events>> getAllEvents() async {
+    return _queryAdapter.queryList('SELECT * from Events',
+        mapper: (Map<String, Object?> row) => Events(
             row['id'] as int?,
             row['title'] as String?,
             row['startTime'] as String?,
@@ -145,12 +145,17 @@ class _$EventDAO extends EventDAO {
 
   @override
   Future<List<String>> getAllTitles() async {
-    return _queryAdapter.queryList('SELECT title from EventEntity',
+    return _queryAdapter.queryList('SELECT title from Events',
         mapper: (Map<String, Object?> row) => row.values.first as String);
   }
 
   @override
-  Future<void> insertEvent(EventEntity event) async {
-    await _eventEntityInsertionAdapter.insert(event, OnConflictStrategy.abort);
+  Future<void> deleteAllEvents() async {
+    await _queryAdapter.queryNoReturn('DELETE from Events');
+  }
+
+  @override
+  Future<void> insertEvent(Events event) async {
+    await _eventsInsertionAdapter.insert(event, OnConflictStrategy.abort);
   }
 }

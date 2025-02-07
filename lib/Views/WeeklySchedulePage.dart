@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:intl/intl.dart';
-import 'package:meeting_room_app/Model/EventModel.dart';
-import 'package:meeting_room_app/ViewModel/EventFunctions.dart';
+import 'package:marquee/marquee.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -48,8 +47,8 @@ class _SchedulePageState extends State<SchedulePage> {
     return "$start - $end";
   }
 
-  void showOverlay(
-      BuildContext context, String eventTitle, DateTime start, DateTime end) {
+  void showOverlay(BuildContext context, String eventTitle,
+      String? eventDescription, DateTime start, DateTime end) {
     String timeRange = formatTimeRange(start, end);
     OverlayEntry? overlayEntry;
 
@@ -88,13 +87,36 @@ class _SchedulePageState extends State<SchedulePage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              eventTitle,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 48,
-                                fontFamily: 'Instrument Sans',
-                                fontWeight: FontWeight.w700,
+                            ConstrainedBox(
+                              constraints: BoxConstraints(maxWidth: 850, maxHeight: 60), // Constrain the width of the Marquee
+                              child: eventTitle.length > 30
+                                  ? Marquee(
+                                text: eventTitle,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 48,
+                                  fontFamily: 'Instrument Sans',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                scrollAxis: Axis.horizontal,
+                                blankSpace: 20.0,
+                                velocity: 100.0,
+                                pauseAfterRound: Duration(seconds: 1),
+                                startPadding: 10.0,
+                                accelerationDuration: Duration(seconds: 1),
+                                accelerationCurve: Curves.linear,
+                                decelerationDuration:
+                                Duration(milliseconds: 500),
+                                decelerationCurve: Curves.easeOut,
+                              )
+                                  : Text(
+                                eventTitle,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 48,
+                                  fontFamily: 'Instrument Sans',
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                             GestureDetector(
@@ -148,7 +170,7 @@ class _SchedulePageState extends State<SchedulePage> {
                         Padding(
                           padding: const EdgeInsets.only(right: 15),
                           child: Text(
-                            'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus.',
+                            eventDescription!,
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 20,
@@ -323,10 +345,12 @@ class _SchedulePageState extends State<SchedulePage> {
                 setState(() {
                   if (date.isAfter(currentWeek)) {
                     currentWeek = currentWeek.add(Duration(days: 7));
-                    currentMonthName = DateFormat('MMM yyyy').format(currentWeek);
+                    currentMonthName =
+                        DateFormat('MMM yyyy').format(currentWeek);
                   } else {
                     currentWeek = currentWeek.add(Duration(days: -7));
-                    currentMonthName = DateFormat('MMM yyyy').format(currentWeek);
+                    currentMonthName =
+                        DateFormat('MMM yyyy').format(currentWeek);
                   }
                 });
               },
@@ -359,8 +383,8 @@ class _SchedulePageState extends State<SchedulePage> {
               weekPageHeaderBuilder: WeekHeader.hidden,
               timeLineWidth: 150,
               onEventTap: (events, date) {
-                showOverlay(context, events.last.title, events.last.startTime!,
-                    events.last.endTime!);
+                showOverlay(context, events.last.title, events.last.description,
+                    events.last.startTime!, events.last.endTime!);
               },
               timeLineBuilder: (date) {
                 final hour = date.hour;
@@ -559,13 +583,19 @@ class _SchedulePageState extends State<SchedulePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
-                      child: Icon(Icons.keyboard_arrow_left, size: 32,),
+                      child: Icon(
+                        Icons.keyboard_arrow_left,
+                        size: 32,
+                      ),
                       onTap: () {
                         goToPrevWeek();
                       },
                     ), // Previous Week Button
                     GestureDetector(
-                      child: Icon(Icons.navigate_next, size: 32,),
+                      child: Icon(
+                        Icons.navigate_next,
+                        size: 32,
+                      ),
                       onTap: () {
                         goToNextWeek();
                       },

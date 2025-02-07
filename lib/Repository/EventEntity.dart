@@ -1,7 +1,7 @@
 import 'package:floor/floor.dart';
 
 @entity
-class EventEntity{
+class Events{ // Events Table to store event data in sqlite db
 
   @PrimaryKey(autoGenerate: true)
   int? id;
@@ -10,5 +10,5 @@ class EventEntity{
   String? startTime;
   String? endTime;
 
-  EventEntity(this.id, this.title, this.startTime, this.endTime);
+  Events(this.id, this.title, this.startTime, this.endTime);
 }

@@ -5,12 +5,15 @@ import 'EventEntity.dart';
 @dao
 abstract class EventDAO{
   
-  @Query("SELECT * from EventEntity")
-  Future<List<EventEntity>> getAllEvents();
+  @Query("SELECT * from Events")
+  Future<List<Events>> getAllEvents();
 
-  @Query("SELECT title from EventEntity")
+  @Query("SELECT title from Events")
   Future<List<String>> getAllTitles();
 
   @insert
-  Future<void> insertEvent(EventEntity event);
+  Future<void> insertEvent(Events event);
+
+  @Query("DELETE from Events")
+  Future<void> deleteAllEvents();
 }
