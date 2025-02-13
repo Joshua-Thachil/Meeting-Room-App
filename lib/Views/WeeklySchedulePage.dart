@@ -3,6 +3,8 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:intl/intl.dart';
 import 'package:marquee/marquee.dart';
 
+import '../Repository/EventEntity.dart';
+
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
 
@@ -48,7 +50,7 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   void showOverlay(BuildContext context, String eventTitle,
-      String? eventDescription, DateTime start, DateTime end) {
+      String? eventDescription, DateTime start, DateTime end, String booker) {
     String timeRange = formatTimeRange(start, end);
     OverlayEntry? overlayEntry;
 
@@ -62,7 +64,7 @@ class _SchedulePageState extends State<SchedulePage> {
               height: 594,
               clipBehavior: Clip.antiAlias,
               decoration: ShapeDecoration(
-                color: Color(0xFFF4D35E),
+                color: Color(0xffd5c6e0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
@@ -187,7 +189,7 @@ class _SchedulePageState extends State<SchedulePage> {
                         Icon(Icons.person_2_outlined, size: 32),
                         SizedBox(width: 18),
                         Text(
-                          'Dr. Vijay Arputharaj',
+                          booker,
                           style: TextStyle(
                             color: Colors.black,
                             fontSize: 20,
@@ -261,7 +263,7 @@ class _SchedulePageState extends State<SchedulePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Panel Room, 2nd block',
+                      'Room 911, Audi Block',
                       style: TextStyle(
                           color: Colors.black,
                           fontSize: 16,
@@ -383,8 +385,9 @@ class _SchedulePageState extends State<SchedulePage> {
               weekPageHeaderBuilder: WeekHeader.hidden,
               timeLineWidth: 150,
               onEventTap: (events, date) {
-                showOverlay(context, events.last.title, events.last.description,
-                    events.last.startTime!, events.last.endTime!);
+                final CustomCalendarEventData event = events.last as CustomCalendarEventData;
+                showOverlay(context, event.title, event.description,
+                    event.startTime!, event.endTime!, event.bookedBy);
               },
               timeLineBuilder: (date) {
                 final hour = date.hour;
@@ -480,12 +483,12 @@ class _SchedulePageState extends State<SchedulePage> {
                         const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
                     child: Container(
                       decoration: ShapeDecoration(
-                        color: Color(0xFFF4D35E),
+                        color: Color(0xffd5c6e0),
                         shape: RoundedRectangleBorder(
                           side: BorderSide(
                             width: 2,
                             strokeAlign: BorderSide.strokeAlignOutside,
-                            color: Color(0xFFDA5959),
+                            color: Color(0xFF000000),
                           ),
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -536,9 +539,9 @@ class _SchedulePageState extends State<SchedulePage> {
                         const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
                     child: Container(
                       decoration: ShapeDecoration(
-                        color: Color(0xFFF4D35E),
+                        color: Color(0xffd5c6e0),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                       child: Padding(

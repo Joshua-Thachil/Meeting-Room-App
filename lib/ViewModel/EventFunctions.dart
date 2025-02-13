@@ -10,7 +10,7 @@ class EventFunctions {
 
     // Get All Events for this month
     List<CalendarEventData> monthEvents = await EventApiService.fetchEvents(
-        DateTime.now().add(Duration(days: -7)).toIso8601String(), DateTime.now().add(Duration(days: 30)).toIso8601String());
+        DateTime.now().add(Duration(days: -14)).toIso8601String(), DateTime.now().add(Duration(days: 30)).toIso8601String());
 
     controller.addAll(monthEvents);
   }
