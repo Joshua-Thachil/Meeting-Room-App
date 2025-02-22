@@ -376,6 +376,7 @@ class _DailySchedulePageState extends State<DailySchedulePage> {
                     onPageChange: (date, page) {
                       setState(() {
                         _currentDate = date; // Update the current date
+                        currentMonthName = DateFormat('MMMM\nyyyy').format(_currentDate);
                       });
                     },
                     onEventTap: (events, date) {

@@ -234,7 +234,7 @@ class _SchedulePageState extends State<SchedulePage> {
   void _showMonthPicker(BuildContext context) async {
     DateTime? selectedDate = await showDatePicker(
       context: context,
-      firstDate: DateTime.now(),
+      firstDate: currentWeek,
       initialDate: currentWeek,
       lastDate: DateTime(2050),
     );
